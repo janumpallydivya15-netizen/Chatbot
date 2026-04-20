@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="chat-layout">
+    <aside class="glass-panel chat-side-panel">
+        <span class="eyebrow">AI care assistant</span>
+        <h2>Describe symptoms naturally.</h2>
+        <p>
+            Type the way a real patient would speak. CareConnect AI will return
+            guidance immediately and keep your recent conversations in history.
+        </p>
+
+        <div class="prompt-list">
+            <button class="prompt-chip" onclick="fillPrompt('I have chest pain and shortness of breath')">Chest pain</button>
+            <button class="prompt-chip" onclick="fillPrompt('I have fever and body pain since yesterday')">Fever</button>
+            <button class="prompt-chip" onclick="fillPrompt('I have stomach pain and vomiting')">Stomach pain</button>
+            <button class="prompt-chip" onclick="fillPrompt('I have a sore throat and cough')">Sore throat</button>
+        </div>
+
+        <div class="info-card">
+            <strong>Need past conversations?</strong>
+            <p>Open the history page to review your recent symptom checks.</p>
+            <a href="{{ url_for('history_page') }}" class="text-link">View history</a>
+        </div>
+    </aside>
+
+    <section class="glass-panel chat-main-panel">
+        <div class="panel-header">
+            <div>
+                <span class="eyebrow">Live conversation</span>
+                <h2>CareConnect Chatbot</h2>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <form action="{{ url_for('clear_history') }}" method="POST" style="margin: 0;">
+                    <button type="submit" style="background: rgba(255, 99, 132, 0.05); border: 1px solid rgba(255, 99, 132, 0.2); color: #ff6b81; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255, 99, 132, 0.15)'" onmouseout="this.style.background='rgba(255, 99, 132, 0.05)'">
+                        Clear history
+                    </button>
+                </form>
+                <div class="status-chip">
+                    <span class="status-dot"></span>
+                    Responding instantly
+                </div>
+            </div>
+        </div>
+
+        <div id="chatBox" class="chat-box modern-chat-box">
+            <div class="bot-msg rich-bubble">
+                <span class="bubble-role">CareConnect AI</span>
+                Tell me what symptoms you are feeling, and I will guide you right away.
+            </div>
+
+            {% for item in chat_history %}
+                <div class="user-msg rich-bubble">
+                    <span class="bubble-role">You</span>
+                    {{ item.user_message }}
+                </div>
+                <div class="bot-msg rich-bubble">
+                    <span class="bubble-role">CareConnect AI</span>
+                    {{ item.bot_reply | markdown }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="input-area modern-input-area">
+            <input type="text" id="userInput" placeholder="Example: I have cough, fever, and body pain">
+            <button class="btn btn-primary send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </section>
+</section>
+
+<script>
+const chatBox = document.getElementById("chatBox");
+const userInput = document.getElementById("userInput");
+
+function appendMessage(role, text) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `${role}-msg rich-bubble`;
+
+    const roleLabel = document.createElement("span");
+    roleLabel.className = "bubble-role";
+    roleLabel.textContent = role === "user" ? "You" : "CareConnect AI";
+
+    const textNode = document.createElement("span");
+    
+    if (role === "bot") {
+        let htmlContent = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        htmlContent = htmlContent.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        htmlContent = htmlContent.replace(/\*(.*?)\*/g, "<em>$1</em>");
+        htmlContent = htmlContent.replace(/\n/g, "<br>");
+        textNode.innerHTML = htmlContent;
+    } else {
+        textNode.textContent = text;
+    }
+
+    messageDiv.appendChild(roleLabel);
+    messageDiv.appendChild(textNode);
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function appendSeverityAlert(text) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = "severity-alert";
+    alertDiv.textContent = text;
+    chatBox.appendChild(alertDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function fillPrompt(text) {
+    userInput.value = text;
+    userInput.focus();
+}
+
+function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message) {
+        return;
+    }
+
+    appendMessage("user", message);
+    userInput.value = "";
+
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "bot-msg rich-bubble typing-bubble";
+    typingDiv.innerHTML = `
+        <span class="bubble-role">CareConnect AI</span>
+        Thinking about your symptoms...
+    `;
+    chatBox.appendChild(typingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: message})
+    })
+        .then(async response => {
+            const contentType = response.headers.get("content-type") || "";
+            const data = contentType.includes("application/json")
+                ? await response.json()
+                : {reply: await response.text()};
+
+            if (!response.ok) {
+                throw new Error(data.alert_notice || data.reply || `Request failed with status ${response.status}`);
+            }
+
+            return data;
+        })
+        .then(data => {
+            typingDiv.remove();
+            if (data.severity === "severe" && data.alert_notice) {
+                appendSeverityAlert(data.alert_notice);
+            }
+            appendMessage("bot", data.reply || "Please try again.");
+        })
+        .catch(error => {
+            typingDiv.remove();
+            appendMessage(
+                "bot",
+                error.message || "CareConnect could not process your symptoms right now."
+            );
+        });
+}
+
+userInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+});
+
+chatBox.scrollTop = chatBox.scrollHeight;
+</script>
+{% endblock %}

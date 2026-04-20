@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-copy">
+        <span class="eyebrow">Secure access</span>
+        <h1>Welcome back to your healthcare AI workspace.</h1>
+        <p>
+            Sign in to continue symptom conversations, view session history,
+            and access the CareConnect experience with a clean clinical dashboard feel.
+        </p>
+        <div class="auth-points">
+            <div class="auth-point">Immediate AI symptom guidance</div>
+            <div class="auth-point">Session-based chat history</div>
+            <div class="auth-point">Modern patient-friendly experience</div>
+        </div>
+    </div>
+
+    <form class="glass-panel auth-card" method="post">
+        <span class="eyebrow">Login</span>
+        <h2>Sign in</h2>
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Enter your password" required>
+
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+        <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+    </form>
+</section>
+{% endblock %}

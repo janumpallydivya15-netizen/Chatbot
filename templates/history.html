@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-heading">
+    <div>
+        <span class="eyebrow">Conversation history</span>
+        <h1>Your recent care records</h1>
+        <p>Review symptom checks from this session and continue your care journey with confidence.</p>
+    </div>
+
+    <form action="{{ url_for('clear_history') }}" method="post">
+        <button type="submit" class="btn btn-secondary">Clear History</button>
+    </form>
+</section>
+
+{% if history %}
+    <section class="history-grid">
+        {% for item in history %}
+            <article class="glass-panel history-card">
+                <div class="history-top">
+                    <span class="history-time">{{ item.created_at }}</span>
+                    <span class="history-badge">Saved</span>
+                </div>
+                <div class="history-message">
+                    <small>You said</small>
+                    <p>{{ item.user_message }}</p>
+                </div>
+                <div class="history-message history-reply">
+                    <small>CareConnect AI replied</small>
+                    <p>{{ item.bot_reply }}</p>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <section class="glass-panel empty-state">
+        <h2>No history yet</h2>
+        <p>Start a symptom check in chat and your conversation history will appear here.</p>
+        <a href="{{ url_for('chat_page') }}" class="btn btn-primary">Go To Chat</a>
+    </section>
+{% endif %}
+{% endblock %}

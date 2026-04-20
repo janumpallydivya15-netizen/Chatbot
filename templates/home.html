@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-card">
+    <div class="hero-copy">
+        <span class="eyebrow">Always-on healthcare AI</span>
+        <h1>Medical support that feels calm, modern, and ready when you are.</h1>
+        <p>
+            CareConnect AI helps people describe symptoms, receive quick guidance,
+            and keep recent conversations in one place with a clean real-world interface.
+        </p>
+
+        <div class="hero-actions">
+            <a href="{{ url_for('chat_page') }}" class="btn btn-primary">Start Symptom Check</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary">Create Account</a>
+        </div>
+
+        <div class="metric-row">
+            <article class="metric-card">
+                <strong>24/7</strong>
+                <span>Instant health guidance</span>
+            </article>
+            <article class="metric-card">
+                <strong>Fast</strong>
+                <span>Immediate symptom responses</span>
+            </article>
+            <article class="metric-card">
+                <strong>Private</strong>
+                <span>Session-based history tracking</span>
+            </article>
+        </div>
+    </div>
+
+    <div class="hero-panel glass-panel">
+        <div class="status-chip">
+            <span class="status-dot"></span>
+            AI assistant online
+        </div>
+
+        <div class="preview-card">
+            <p class="preview-label">Today's quick check</p>
+            <div class="preview-bubble user-bubble">I have a sore throat and mild fever.</div>
+            <div class="preview-bubble bot-bubble">
+                Stay hydrated, rest, and monitor the fever. If it gets worse or lasts more than 2 days, please consult a doctor.
+            </div>
+        </div>
+
+        <div class="insight-grid">
+            <div class="insight-card">
+                <span>Smart triage</span>
+                <strong>Urgent symptoms get priority guidance.</strong>
+            </div>
+            <div class="insight-card">
+                <span>Conversation memory</span>
+                <strong>Recent chats appear in the history page.</strong>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="feature-grid">
+    <article class="glass-panel feature-card">
+        <span class="feature-tag">01</span>
+        <h3>AI-first chat</h3>
+        <p>Polished symptom entry with quick replies and a focused conversation layout.</p>
+    </article>
+    <article class="glass-panel feature-card">
+        <span class="feature-tag">02</span>
+        <h3>Care history</h3>
+        <p>Every conversation can be viewed again on the history page inside the same session.</p>
+    </article>
+    <article class="glass-panel feature-card">
+        <span class="feature-tag">03</span>
+        <h3>Simple access</h3>
+        <p>Dedicated login and register pages give the app a more complete real-world flow.</p>
+    </article>
+</section>
+{% endblock %}
